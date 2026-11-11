@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi sistema</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+<style>
+:root{--bg:#F3F5F9;--card:#fff;--ink:#1F2A44;--mut:#5d6881;--line:#d9deea;--ac:#2E7D5B;--acs:#dcebe3;--onac:#fff}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1626;--card:#1a2338;--ink:#eef1f8;--mut:#9aa6c0;--line:#2b3753;--ac:#4fb68a;--acs:#1d3a31;--onac:#0f1626}}
+*{box-sizing:border-box}
+html{color-scheme:light dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top,0px) 0 calc(76px + env(safe-area-inset-bottom,0px))}
+main{max-width:560px;margin:0 auto;padding:16px}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+h1{font:800 30px/1.1 "Arial Narrow","Helvetica Neue",Arial,sans-serif;letter-spacing:-.5px;margin:4px 0 2px}
+h2{font-size:14px;font-weight:700;color:var(--mut);margin:20px 0 6px}
+.sub{color:var(--mut);margin:0 0 14px}
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:14px}
+.strip button{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 0 6px;text-align:center;line-height:1.15}
+.strip b{display:block;font-size:19px}
+.strip span{font-size:12px;color:var(--mut)}
+.strip i{display:block;height:4px;margin:6px 8px 0;border-radius:2px;background:var(--line);overflow:hidden}
+.strip i u{display:block;height:100%;background:var(--ac)}
+.strip .sel{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.strip .sel span{color:var(--bg);opacity:.75}
+.strip .hoy b::after{content:"•";color:var(--ac);margin-left:1px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0 4px}
+.bar u{display:block;height:100%;background:var(--ac);transition:width .25s}
+.row{display:flex;align-items:stretch;background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}
+.chk{width:56px;flex:none;display:grid;place-items:center}
+.chk span{width:26px;height:26px;border-radius:8px;border:2px solid var(--mut);display:grid;place-items:center;font-weight:800;color:var(--onac)}
+.done .chk span{background:var(--ac);border-color:var(--ac)}
+.info{flex:1;text-align:left;padding:12px 12px 12px 0}
+.info b{display:block;font-weight:650}
+.info small{color:var(--mut);display:block}
+.done .info b{text-decoration:line-through;opacity:.55}
+.tag{color:var(--ac);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px}
+.flex{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.nav{display:flex;gap:8px}
+.nav button,.pill{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 12px}
+.stepper button{width:36px;height:36px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-weight:800}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs button{padding:14px 0;font-weight:650;color:var(--mut);font-size:13px}
+.tabs .on{color:var(--ac);box-shadow:inset 0 3px 0 var(--ac)}
+#m{position:fixed;inset:0;background:rgba(10,15,28,.55);display:none;align-items:flex-end;justify-content:center;z-index:5}
+#m.open{display:flex}
+#m div{background:var(--card);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));max-height:85vh;overflow:auto}
+#m h3{margin:0 0 10px;font-size:22px}
+#m p{margin:0 0 10px}
+#m b{color:var(--ac)}
+#m .x{margin-top:6px;width:100%;padding:12px;border-radius:12px;background:var(--ac);color:var(--onac);font-weight:700}
+.add{display:grid;gap:8px;margin-top:14px}
+.add input{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;width:100%}
+.add input:focus-visible{outline:3px solid var(--ac);outline-offset:1px}
+.add .x{padding:12px;border-radius:12px;background:var(--ac);color:var(--onac);font-weight:700}
+.del{align-self:center;margin-right:10px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;color:var(--mut);font-size:14px}
+.paid .info b{text-decoration:line-through;opacity:.55}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav class="tabs" id="tabs"></nav>
+<div id="m" role="dialog" aria-modal="true"><div id="mc"></div></div>
+<script>
+const T={
+lev:["Levantarme 7:00","Apagar la alarma y no volver a la cama. Es el hábito que sostiene el resto del día.","Pies en el piso, hacer la cama, agua, desayuno y mate. Si saliste de noche: alarma a las 8:30 y mínimo parar, hacer la cama y tomar agua.","Pies en el piso y cama hecha."],
+med:["Meditar 5 min","Calmar la cabeza antes de arrancar.","Apenas te levantás, sentado, con un audio o un timer de 5 minutos.","3 a 5 minutos."],
+fra:["Frases Yo soy","Escribir quién sos, en presente.","Una vez a la mañana y otra a la noche. Ejemplo: Yo soy un futbolista que entrena todos los días. Yo cumplo lo que escribo.","3 frases."],
+ads:["Ads 5 min","Mirar los números antes de decidir.","Abrí el panel: gasto y ventas de ayer. Apagá lo que pierde, anotá lo que gana y cerrá.","Mirar el gasto de ayer."],
+ali:["Alimentación simple","Combustible simple, sin azúcar ni antojos, un plato por comida.","<b>Antes de entrenar:</b> carbohidratos 100%.<br><b>Después de entrenar:</b> mitad carbohidratos y mitad proteína, con grasas saludables opcionales.<br><b>Día sin entrenamiento fuerte (domingo):</b> dos comidas, almuerzo y cena, mitad y mitad. Si te da mucha hambre, sumá una colación con proteína.<br>Siempre sentado, proteína primero, postre solo después y uno solo.","Un plato simple por comida."],
+vis:["Visualizar + concentración","Entrenar la cabeza: repetir jugadas bien hechas y la atención.","Al volver del club o al mediodía, en la terraza: visualizá 6 minutos las jugadas que salieron mal, hechas bien. Después 1 a 3 ejercicios de tu PDF de concentración.","5 minutos de concentración."],
+clu:["Club","Entrenamiento del equipo.","Puntual, escuchar al técnico y no faltar. Si se suspende: lluvia = gym, si no = resistencia.","Ir y cumplir."],
+par:["Partido","Competir.","Si no hay partido: resistencia, o gym si llueve.","Jugar."],
+res:["Resistencia","Recuperar la resistencia que perdiste.","Los días sin club (menos el domingo): Rutina Resistencia Axel o Rutina Plaza Boulevard, a la mañana. Sin trote largo hasta el ok del kinesio.","10 minutos."],
+gym:["Gym","Fuerza, potencia y core. También protege la rodilla.","2 a 3 ejercicios de fuerza y potencia más core. Solo si el club fue liviano o no hubo club. Si el club fue pesado, hacé solo movilidad.","Movilidad 10 minutos."],
+gol:["Golf: técnica con pelota","Pelota en los pies.","1 a 3 ejercicios anotados. Martes y miércoles, mínimo 2. Lunes, jueves y viernes, 1 ejercicio al volver. Cuando toque, velocidad de 20 a 30 minutos (Tano Coach).","10 minutos de pelota."],
+mov:["Movilidad 10 min","Soltar el cuerpo cuando el club fue pesado.","Rollo y elongación suave, sin cargar las piernas.","10 minutos."],
+her:["Buscar a mi hermanito","Tiempo con tu hermano.","Salís 15:30 y volvés ~18:30. Lunes y viernes hay natación: en los 40 minutos libres, Ads o WhatsApp y saludar a 1 persona. Jueves: taekwondo.","Estar y aprovechar el hueco."],
+del:["Delivery","Tu ingreso base: paga las deudas.","Salir a más tardar a las 20:00 (domingo de 12 a 20). Sin celular en la mano al manejar. Lo cobrado: separar primero lo que vence.","Cumplir el turno."],
+ven:["Compu: ventas","Tu negocio y tu segundo ingreso.","En ratos libres: 3 publicaciones en Marketplace por semana, un producto digital low ticket de WhatsApp en test y avance visible del software.","20 minutos."],
+cla:["Claridad","Decir una idea simple en pocas palabras.","Leé una página o mirá un video y contalo en voz alta en 1 o 2 frases (por audio). Se afina qué sacar y cómo decirlo más corto.","5 a 10 minutos."],
+sal:["Salida a hablar con gente","Practicar conversar y tolerar el no.","Una vez por semana, con un amigo en moto o en la plaza. Se mide en conversaciones iniciadas, no en números conseguidos.","Iniciar 1 conversación."],
+caf:["Café y planificar la semana","Ordenar la semana el domingo temprano.","Café afuera (solo el café). Mirá el plan, los pagos y elegí una sola cosa para ajustar.","20 minutos."],
+elo:["Rollo + elongación","Recuperación diaria.","En el living, con One Piece. Una vez por día.","5 minutos."],
+voz:["Voz grave","Una voz más firme y clara.","Respiración diafragmática 2 min, zumbido suave 1 min, lectura en voz alta lenta con pausas 3 a 5 min. No fuerces el tono; si molesta la garganta, parás.","5 minutos."],
+rut:["Rutina de noche (15 min)","Dejar la mañana resuelta.","Mate y termo, ropa de mañana y de entreno, mochila, 3 acciones de mañana con qué, dónde y cuándo, y frases Yo soy. Celular al cajón.","Escribir las 3 acciones."],
+cam:["Cama antes de las 00:00","Dormir de 6 a 8 horas, apuntando a 7.","Sin celular en la cama. La alarma va en el cajón del escritorio.","Cama antes de las 00:00."]
+};
+const base=[["lev","7:00"],["med"],["fra"],["ads"]];
+const fin=[["elo"],["voz"],["rut"],["cam","antes de las 00:00"]];
+const P=[
+{m:[["lev","7:00"],["med"],["ads"],["res","a la mañana","Si llueve: gym"]],t:[["vis","12:30"],["ali"],["her","15:30 a 18:30"],["gol","18:30","1 ejercicio"]],n:[["del","salir 20:00 máx."],...fin]},
+{m:[...base,["clu","8:00 a 12:00"]],t:[["vis","12:30"],["mov","Si el club fue pesado"],["gol","15:00","Mínimo 2 ejercicios"],["ven","en la compu"],["cla"],["ali"]],n:[["del"],...fin]},
+{m:[...base,["clu","8:00 a 12:00"]],t:[["vis","12:30"],["gol","15:00","Mínimo 2 ejercicios"],["gym","Si el club fue liviano; si no, movilidad"],["ali"]],n:[["del"],...fin]},
+{m:[...base,["clu","Si se suspende: lluvia = gym, si no = resistencia"]],t:[["vis","12:30"],["her","15:30, taekwondo"],["cla"],["ali"]],n:[["gol","~19:00","1 ejercicio"],["del","si cumpliste el día"],...fin]},
+{m:[...base,["clu","Si se suspende: lluvia = gym, si no = resistencia"]],t:[["vis","12:30"],["ali"],["her","15:30 a 18:30"],["gol","18:30","1 ejercicio"]],n:[["del","salir 20:00 máx."],...fin]},
+{m:[...base,["par","Si no hay: resistencia, o gym si llueve"]],t:[["vis","12:30"],["gym","o golf con velocidad"],["ali"]],n:[["del"],...fin]},
+{m:[["lev","7:00"],["med"],["fra"],["caf","temprano, afuera"],["ven","un poco de página de venta"]],t:[["ali","2 comidas"],["del","12:00 a 20:00"],["cla"]],n:[["sal","20:15, opcional"],...fin]}
+];
+const SL=[["m","Mañana"],["t","Mediodía y tarde"],["n","Noche"]];
+const GOALS=[["gym","Gym",2],["res","Resistencia",1],["gol","Golf o pelota",5],["cla","Claridad",3],["sal","Salida a hablar con gente",1]];
+const PAGOS=[["gym","6/11","Gym","$40.000","Si sigue pendiente, va primero"],["club","10/11","Club","$80.000","Hasta el 10, cuanto antes mejor"],["mp1","11/11","Mercado Pago cuota 1 + crédito","$110.400",""],["mp2","11/12","Mercado Pago cuota 2","$100.000",""],["abu","25/12","Abuela","$300.000","$7.500 por día desde el 15/11"],["mp3","11/01","Mercado Pago cuota 3","$100.000",""]];
+const S1=(n,x)=>[n,...x.slice(1)];
+const B={
+f:[
+["Juntar y editar tus videos","Tarea única y la primera de todas: sin videos, los clubes no te ven.","Juntá todos tus videos en una carpeta, subilos a Canva, recortá tus jugadas y armá uno de 1 a 2 minutos. Después enviá a clubes de afuera y a cuentas de Instagram de oportunidades. Si piden pago, verificá que sean serios.","Semana 1 juntar, semana 2 editar, después 1 acción por día."],
+["Sueño","Dormir de 6 a 8 horas, apuntando a 7. Es donde el cuerpo se recupera.","Cama antes de las 00:00, levantarte a las 7:00, celular afuera de la cama y rutina de noche de 15 minutos.","Rutina de noche + cama antes de las 00:00."],
+S1("Alimentación",T.ali),
+["Profesionalismo","Ser alguien de quien un técnico puede fiarse.","Puntualidad, no faltar al club, escuchar al técnico, cumplir lo que escribiste y cuidarte fuera de la cancha.","Cumplir el plan del día."],
+["Gym: fuerza, potencia y prevención",T.gym[1],"Mantener 2 a 3 ejercicios de fuerza y potencia más core, 3 veces por semana (isquios, glúteos y core protegen la rodilla). Cuando haya plata, sumar el curso de Tano Coach con seguimiento.","3 veces por semana, o movilidad 10 minutos."],
+S1("Resistencia",T.res),
+["Técnica (golf)",T.gol[1],T.gol[2],T.gol[3]],
+["Recuperación","Baja la carga acumulada en los músculos.","Rollo + elongación una vez por día y un día de descanso activo por semana.","5 minutos de rollo + elongación."],
+["Neurocognitivo (concentración)","Entrenar la decisión rápida y la atención.","Tu PDF de ejercicios de concentración: 1 a 3 ejercicios por día, todos los días, apenas volvés del club.","1 ejercicio de 5 minutos."],
+["Mental","Calma y foco antes de jugar.","Meditar 5 minutos apenas te levantás y visualizar 6 minutos las jugadas mal hechas, repetidas bien.","Meditar 5 min + visualizar."]
+],
+d:[
+["Administración","Saber a dónde va cada peso y cumplir los pagos a tiempo.","Calendario de pagos siempre a la vista. Separar primero lo que se debe. Desde
